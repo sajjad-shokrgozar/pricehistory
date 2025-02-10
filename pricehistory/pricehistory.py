@@ -1,5 +1,6 @@
 import requests
 import csv
+import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 
@@ -47,7 +48,11 @@ class PriceHistory:
         Reads firms_info.csv and returns a list of (symbol, id).
         """
         firms_info = []
-        with open('firms_info.csv', 'r', encoding='utf-8') as f:
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        csv_path = os.path.join(base_path, 'firms_info.csv')
+
+        with open(csv_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if fetch_all:
@@ -189,5 +194,5 @@ class PriceHistory:
 
         return records_asc
 
-result_json = PriceHistory.get(symbols=['فملی', 'فولاد'], max_workers=8)
-print(result_json)
+# result_json = PriceHistory.get(symbols=['فملی', 'فولاد'], max_workers=8)
+# print(result_json)
