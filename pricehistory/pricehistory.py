@@ -4,6 +4,8 @@ import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 
+from market import Market
+
 class PriceHistory:
     # Precompile the regex for filtering
     bad_symbol_pattern = re.compile(r'[0-9]|ح$')
@@ -28,7 +30,7 @@ class PriceHistory:
         })
 
         # 1) Read (symbol, id) info from CSV
-        firms_info = cls._get_firms_info(symbols, fetch_all)
+        firms_info = Market.get_firms_info(symbols, fetch_all)
 
         # 2) Fetch data for each firm in parallel
         all_data = []
@@ -41,26 +43,6 @@ class PriceHistory:
         adjusted_data = cls._adjust_price(all_data)
 
         return adjusted_data
-
-    @staticmethod
-    def _get_firms_info(symbols, fetch_all):
-        """
-        Reads firms_info.csv and returns a list of (symbol, id).
-        """
-        firms_info = []
-
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        csv_path = os.path.join(base_path, 'firms_info.csv')
-
-        with open(csv_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if fetch_all:
-                    firms_info.append((row['symbol'], row['id']))
-                else:
-                    if row['symbol'] in symbols:
-                        firms_info.append((row['symbol'], row['id']))
-        return firms_info
 
     @classmethod
     def _fetch_symbol_data(cls, symbol_id_tuple, session):
