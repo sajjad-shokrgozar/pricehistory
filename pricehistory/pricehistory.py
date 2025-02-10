@@ -1,6 +1,5 @@
 import requests
 import csv
-import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 
@@ -42,23 +41,20 @@ class PriceHistory:
 
         return adjusted_data
 
-    @classmethod
-    def _get_firms_info(cls, symbols, fetch_all):
+    @staticmethod
+    def _get_firms_info(symbols, fetch_all):
         """
         Reads firms_info.csv and returns a list of (symbol, id).
         """
         firms_info = []
-        
-        # Get the absolute path of the CSV file within the package
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        csv_path = os.path.join(base_path, 'firms_info.csv')
-
-        # Open the file using the correct path
-        with open(csv_path, 'r', encoding='utf-8') as f:
+        with open('firms_info.csv', 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                firms_info.append(row)
-
+                if fetch_all:
+                    firms_info.append((row['symbol'], row['id']))
+                else:
+                    if row['symbol'] in symbols:
+                        firms_info.append((row['symbol'], row['id']))
         return firms_info
 
     @classmethod
@@ -193,5 +189,5 @@ class PriceHistory:
 
         return records_asc
 
-# usage example
-# result_json = PriceHistory.get(max_workers=8)
+result_json = PriceHistory.get(symbols=['فملی', 'فولاد'], max_workers=8)
+print(result_json)
