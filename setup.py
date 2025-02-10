@@ -5,7 +5,7 @@ setup(
     version="0.1.0",
     author="sajjad_shokrgozar",
     author_email="shokrgozarsajjad@gmail.com",
-    description="Tehran's stock market daily close price history",
+    description="Tehran's stock market daily price history",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/sajjad-shokrgozar/pricehistory_api",
