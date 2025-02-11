@@ -5,6 +5,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 
 from market import Market
+from helpers import Helpers
 
 class PriceHistory:
     # Precompile the regex for filtering
@@ -66,20 +67,21 @@ class PriceHistory:
             # On any network/JSON error, return empty
             return []
         
+        # Safely convert numeric fields (if they're not None)
+        def to_numeric(value):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return None
+        
         # Convert raw response to a list of dicts
         results = []
         for rec in records:
-            # Safely convert numeric fields (if they're not None)
-            def to_numeric(value):
-                try:
-                    return float(value)
-                except (TypeError, ValueError):
-                    return None
-
             results.append({
                 'symbol':       symbol,
                 'id':           rec.get('insCode'),
-                'date':         rec.get('dEven'),        # keep as string (or convert to int if you prefer)
+                'date':         rec.get('dEven'),
+                'jdate':        Helpers.to_jalali(rec.get('dEven')),
                 'min':          to_numeric(rec.get('priceMin')),
                 'max':          to_numeric(rec.get('priceMax')),
                 'yesterday':    to_numeric(rec.get('priceYesterday')),
