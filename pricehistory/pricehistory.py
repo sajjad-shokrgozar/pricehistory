@@ -46,16 +46,17 @@ class PriceHistory:
         return adjusted_data
 
     @classmethod
-    def _fetch_symbol_data(cls, symbol_id_tuple, session):
+    def _fetch_symbol_data(cls, symbol_id_tuple, session, is_option):
         """
         Fetches JSON data for a single (symbol, id) pair.
         Returns a list of dicts for each record in 'closingPriceDaily'.
         """
         symbol, firm_id = symbol_id_tuple
         
-        # Skip symbols with digits or ending with 'ح'
-        if cls.bad_symbol_pattern.search(symbol):
-            return []
+        # Skip symbols with digits or ending with 'ح' (not for options)
+        if not is_option:
+            if cls.bad_symbol_pattern.search(symbol):
+                return []
         
         url = f'https://cdn.tsetmc.com/api/ClosingPrice/GetClosingPriceDailyList/{firm_id}/0'
         
@@ -177,6 +178,32 @@ class PriceHistory:
         records_asc = sorted(records_desc, key=lambda x: x['date'])
 
         return records_asc
+    
+    @classmethod
+    def get_history_by_symbol_id_list(cls, symbol_id_list: list=None, max_workers=8):
+        """
+        'symbol_id_list' format: [[symbol1, firm_id1], [symbol2, firm_id2]]
+        for example:
+            [['فولاد', '46348559193224090'], ['فملی', '35425587644337450'], ['شاراک', '7711282667602555']]
+
+        """
+        # Create a session for all requests
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0'
+        })
+
+        # 2) Fetch data for each firm in parallel
+        all_data = []
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(cls._fetch_symbol_data, fi, session, True) for fi in symbol_id_list]
+            for future in futures:
+                all_data.extend(future.result())
+
+        return all_data
 
 # result_json = PriceHistory.get(symbols=['فملی', 'فولاد'], max_workers=8)
 # print(result_json)
+
+
+# print(PriceHistory.get_history_by_symbol_id_list([['فولاد', '46348559193224090'], ['فملی', '35425587644337450'], ['شاراک', '7711282667602555']]))
