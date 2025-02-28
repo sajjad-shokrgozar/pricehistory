@@ -12,7 +12,7 @@ class PriceHistory:
     bad_symbol_pattern = re.compile(r'[0-9]|ح$')
     
     @classmethod
-    def get(cls, symbols=None, max_workers=8):
+    def get(cls, is_option, symbols=None, max_workers=8):
         """
         Main entry point for fetching and adjusting price data.
         Usage:
@@ -36,7 +36,7 @@ class PriceHistory:
         # 2) Fetch data for each firm in parallel
         all_data = []
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(cls._fetch_symbol_data, fi, session) for fi in firms_info]
+            futures = [executor.submit(cls._fetch_symbol_data, fi, session, is_option) for fi in firms_info]
             for future in futures:
                 all_data.extend(future.result())
 
