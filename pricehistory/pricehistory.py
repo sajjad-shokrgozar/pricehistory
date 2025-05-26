@@ -3,6 +3,7 @@ import csv
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor
+import pandas as pd
 
 from market import Market
 from helpers import Helpers
@@ -201,6 +202,19 @@ class PriceHistory:
                 all_data.extend(future.result())
 
         return all_data
+
+
+    @staticmethod
+    def get_index_history():
+        index_url = 'http://old.tsetmc.com/tsev2/chart/data/Index.aspx?i=32097828799138957&t=value'
+        res = requests.get(index_url)
+        rows = res.text.split(';')
+        index_data = []
+        for row in rows:
+            index_data.append(row.split(','))
+        index_df = pd.DataFrame(index_data, columns=['date', 'index'])
+        index_df['date'] = index_df['date'].replace(r'/', '', regex=True)
+        return index_df
 
 # result_json = PriceHistory.get(symbols=['فملی', 'فولاد'], max_workers=8)
 # print(result_json)

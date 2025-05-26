@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pricehistory",
-    version="0.1.3",
+    version="0.1.4",
     author="sajjad_shokrgozar",
     author_email="shokrgozarsajjad@gmail.com",
     description="Tehran's stock market daily price history",
